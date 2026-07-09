@@ -1,58 +1,50 @@
 # Screenshots
 
-This folder contains screenshots collected throughout the SOC Detection Lab project.
+This directory contains screenshots demonstrating the successful detection of simulated security events within the SOC Detection Lab.
 
-## Purpose
+Each folder corresponds to a specific detection rule and contains screenshots captured from Splunk Enterprise during testing.
 
-Screenshots provide visual evidence of:
+---
 
-* Splunk configuration
-* Data ingestion
-* Detection queries
-* Dashboards
-* Alerts
-* Incident investigations
+## Objectives
 
-## Planned Screenshots
+- Provide visual evidence of detection rules.
+- Demonstrate successful event collection.
+- Validate SPL queries.
+- Showcase incident investigation workflow.
+- Document attack simulations.
 
-### Environment Setup
+---
 
-* Splunk Home Dashboard
-* Data Inputs Configuration
-* Sysmon Installation Verification
+## Screenshot Categories
 
-### Detection Queries
+| Folder | Description |
+|---------|-------------|
+| Detection-01 | Process Creation |
+| Detection-02 | Network Connections |
+| Detection-03 | PowerShell Execution |
+| Detection-04 | Encoded PowerShell |
+| Detection-05 | Registry Persistence |
+| Detection-06 | Scheduled Tasks |
+| Detection-07 | Service Creation |
+| Detection-08 | Remote Desktop |
+| Detection-09 | Failed Logons |
+| Detection-10 | Suspicious Parent-Child |
+| Detection-11 | Living-Off-The-Land |
+| Detection-12 | Credential Access |
 
-* Failed Login Detection
-* PowerShell Activity Detection
-* Process Creation Monitoring
-* Log Clearing Detection
+---
 
-### Dashboards
+## Recommended Screenshots
 
-* Authentication Dashboard
-* Endpoint Monitoring Dashboard
-* Security Overview Dashboard
+Each folder should contain:
 
-### Alerts
+- SPL Search
+- Search Results
+- Event Details
+- Raw Event
+- Detection Evidence
 
-* Brute Force Alert
-* PowerShell Abuse Alert
-* Suspicious Process Alert
+---
 
-### Incident Investigations
-
-* Port Scan Investigation
-* Brute Force Investigation
-* PowerShell Investigation
-
-## Naming Convention
-
-Examples:
-
-* dashboard_authentication.png
-* alert_bruteforce.png
-* investigation_portscan.png
-* powershell_detection.png
-
-All screenshots included in this folder will support the findings and detections documented in the project.
+These screenshots provide evidence that the detection rules and SPL queries operate correctly within the lab environment.
