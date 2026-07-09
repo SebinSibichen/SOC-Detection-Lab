@@ -1,0 +1,10 @@
+# ==========================================
+# Detection: PowerShell Execution
+# Data Source: Sysmon Event ID 1
+# ==========================================
+
+source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1
+Image="*powershell.exe"
+| table _time Image ParentImage CommandLine User
+| sort - _time
