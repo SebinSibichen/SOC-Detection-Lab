@@ -1,0 +1,9 @@
+# ==========================================
+# Detection: Registry Persistence
+# Sysmon Event ID 13
+# ==========================================
+
+source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=13
+| table _time Image TargetObject Details User
+| sort - _time
