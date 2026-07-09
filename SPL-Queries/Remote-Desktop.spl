@@ -1,0 +1,10 @@
+# ==========================================
+# Detection: Remote Desktop Logons
+# Security Event ID 4624
+# ==========================================
+
+source="WinEventLog:Security"
+EventCode=4624
+Logon_Type=10
+| table _time Account_Name Workstation_Name Source_Network_Address
+| sort - _time
