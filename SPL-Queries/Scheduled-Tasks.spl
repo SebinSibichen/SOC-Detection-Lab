@@ -1,0 +1,9 @@
+# ==========================================
+# Detection: Scheduled Task Creation
+# ==========================================
+
+source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1
+(CommandLine="*schtasks*" OR Image="*schtasks.exe")
+| table _time Image ParentImage CommandLine User
+| sort - _time
