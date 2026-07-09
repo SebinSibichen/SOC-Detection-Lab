@@ -1,0 +1,9 @@
+# ==========================================
+# Detection: Windows Service Creation
+# Security Event ID 7045
+# ==========================================
+
+source="WinEventLog:System"
+EventCode=7045
+| table _time Service_Name Image_Path Service_Type Account_Name
+| sort - _time
