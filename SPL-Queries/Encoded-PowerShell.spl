@@ -1,0 +1,10 @@
+# ==========================================
+# Detection: Encoded PowerShell Commands
+# ==========================================
+
+source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1
+Image="*powershell.exe"
+(CommandLine="*-enc*" OR CommandLine="*-EncodedCommand*")
+| table _time Image ParentImage CommandLine User
+| sort - _time
