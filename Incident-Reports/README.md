@@ -1,47 +1,18 @@
 # Incident Reports
 
-This folder contains incident investigation reports created during the SOC Detection Lab.
+This folder contains simulated incident investigations performed during the SOC Detection Lab.
 
-## Purpose
+Each report follows a structured incident response workflow including:
 
-The reports document security events detected by Splunk and analyzed during the project.
+- Incident Summary
+- Detection Rule Triggered
+- Timeline
+- Evidence Collected
+- MITRE ATT&CK Mapping
+- Investigation
+- Root Cause
+- Impact
+- Containment
+- Lessons Learned
 
-## Planned Incident Reports
-
-* Port Scan Detection
-* Brute Force Login Attempt
-* PowerShell Abuse Detection
-* Suspicious Process Execution
-* Log Clearing Activity
-
-## Report Structure
-
-Each report will include:
-
-### Incident Summary
-
-Brief overview of the detected activity.
-
-### Detection Method
-
-SPL query or alert responsible for detection.
-
-### Investigation Steps
-
-Detailed analysis performed by the analyst.
-
-### Evidence
-
-Relevant logs, screenshots, and findings.
-
-### MITRE ATT&CK Mapping
-
-Associated techniques and tactics.
-
-### Remediation
-
-Recommended actions to mitigate the threat.
-
-### Lessons Learned
-
-Key takeaways from the investigation.
+These reports demonstrate practical SOC analyst skills using Splunk, Sysmon and Windows Event Logs.
