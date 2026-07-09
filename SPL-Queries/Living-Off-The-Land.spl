@@ -1,0 +1,13 @@
+# ==========================================
+# Detection: LOLBins
+# ==========================================
+
+source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1
+(Image="*certutil.exe"
+OR Image="*bitsadmin.exe"
+OR Image="*regsvr32.exe"
+OR Image="*mshta.exe"
+OR Image="*rundll32.exe")
+| table _time Image ParentImage CommandLine User
+| sort - _time
