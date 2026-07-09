@@ -1,0 +1,35 @@
+                 +----------------------+
+                 |  Windows 11 VM       |
+                 |----------------------|
+                 | User Activity        |
+                 | Attack Simulation    |
+                 +----------+-----------+
+                            |
+                            |
+                       Windows Logs
+                            |
+                      +-----v------+
+                      |   Sysmon   |
+                      +-----+------+
+                            |
+                   Sysmon Event Logs
+                            |
+                +-----------v-----------+
+                | Splunk Universal      |
+                | Forwarder             |
+                +-----------+-----------+
+                            |
+                         TCP 9997
+                            |
+                +-----------v-----------+
+                | Splunk Enterprise     |
+                | (Host Machine)        |
+                +-----------+-----------+
+                            |
+                  +---------+---------+
+                  |                   |
+          Detection Rules     SPL Queries
+                  |                   |
+                  +---------+---------+
+                            |
+                    Incident Reports
