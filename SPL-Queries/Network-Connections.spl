@@ -1,0 +1,9 @@
+# ==========================================
+# Detection: Network Connections
+# Data Source: Sysmon Event ID 3
+# ==========================================
+
+source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=3
+| table _time Image DestinationIp DestinationHostname DestinationPort Protocol User
+| sort - _time
