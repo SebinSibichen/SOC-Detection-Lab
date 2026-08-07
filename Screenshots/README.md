@@ -1,50 +1,118 @@
 # Screenshots
 
-This directory contains screenshots demonstrating the successful detection of simulated security events within the SOC Detection Lab.
+This directory contains screenshots documenting the complete **SOC Detection Lab**, from environment setup and system configuration to attack detection and investigation within Splunk Enterprise.
 
-Each folder corresponds to a specific detection rule and contains screenshots captured from Splunk Enterprise during testing.
-
----
-
-## Objectives
-
-- Provide visual evidence of detection rules.
-- Demonstrate successful event collection.
-- Validate SPL queries.
-- Showcase incident investigation workflow.
-- Document attack simulations.
+The screenshots provide visual evidence that the lab was successfully deployed and that each detection rule functions as expected.
 
 ---
 
-## Screenshot Categories
+# Folder Structure
 
-| Folder | Description |
-|---------|-------------|
-| Detection-01 | Process Creation |
-| Detection-02 | Network Connections |
-| Detection-03 | PowerShell Execution |
-| Detection-04 | Encoded PowerShell |
-| Detection-05 | Registry Persistence |
-| Detection-06 | Scheduled Tasks |
-| Detection-07 | Service Creation |
-| Detection-08 | Remote Desktop |
-| Detection-09 | Failed Logons |
-| Detection-10 | Suspicious Parent-Child |
-| Detection-11 | Living-Off-The-Land |
-| Detection-12 | Credential Access |
+```text
+Screenshots/
+│
+├── Lab-Setup/
+│   ├── Windows Target VM
+│   ├── Kali Attacker VM
+│   └── Network Architecture
+│
+├── Configuration/
+│   ├── Sysmon Configuration
+│   ├── Splunk Universal Forwarder
+│   ├── inputs.conf Configuration
+│   └── Receiving Port Configuration
+│
+└── Detection-Rules/
+    ├── Process Creation
+    ├── Network Connections
+    ├── PowerShell
+    ├── Encoded PowerShell
+    ├── Registry Persistence
+    ├── Scheduled Tasks
+    ├── Services Creation
+    ├── Remote Desktop
+    ├── Failed Logons
+    ├── Suspicious Parent-Child
+    ├── Living-Off-The-Land
+    └── Credential Access
+```
 
 ---
 
-## Recommended Screenshots
+## Lab Setup
 
-Each folder should contain:
+This folder contains screenshots of the virtual lab environment used throughout the project.
 
-- SPL Search
+Typical screenshots include:
+
+- Windows Target Virtual Machine
+- Kali Linux Attacker Virtual Machine
+- Network Architecture (optional)
+
+**Purpose**
+
+Demonstrates the infrastructure used for attack simulation and security monitoring.
+
+---
+
+## Configuration
+
+This folder contains screenshots showing the configuration of the logging and monitoring infrastructure.
+
+Typical screenshots include:
+
+- Sysmon Installation
+- Sysmon Event Viewer
+- `inputs.conf` Configuration
+- Splunk Universal Forwarder Service
+- Splunk Receiving Port Configuration
+
+**Purpose**
+
+Demonstrates that Windows event logging and log forwarding were configured correctly before attack simulation.
+
+---
+
+## Detection Rules
+
+This folder contains screenshots for every detection rule implemented in the SOC Detection Lab.
+
+Each detection rule has its own subfolder containing evidence of successful detection.
+
+Typical screenshots include:
+
+- SPL Search Query
 - Search Results
+- Expanded Event
 - Event Details
-- Raw Event
-- Detection Evidence
+- Interesting Fields
+- Timeline
+
+**Purpose**
+
+Demonstrates that each SPL query successfully detected the simulated attack and provides supporting evidence for investigation.
 
 ---
 
-These screenshots provide evidence that the detection rules and SPL queries operate correctly within the lab environment.
+# Evidence
+
+All screenshots included in this repository were captured from the author's SOC Detection Lab during attack simulation and detection testing.
+
+The screenshots validate:
+
+- Successful lab deployment
+- Correct Splunk configuration
+- Successful Sysmon event collection
+- Proper log forwarding using Splunk Universal Forwarder
+- Working SPL detection queries
+- Successful attack detection
+- Incident investigation workflow
+
+---
+
+These screenshots provide visual documentation supporting every major component of the SOC Detection Lab.
+
+
+>  **Note:** Some screenshots have been cropped or resized for readability while preserving the original detection results.
+>
+> 
