@@ -1,9 +1,51 @@
-# ==========================================
-# Detection: Network Connections
-# Data Source: Sysmon Event ID 3
-# ==========================================
+==================================================
+01 - Basic Network Connection Detection
+==================================================
 
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=3
-| table _time Image DestinationIp DestinationHostname DestinationPort Protocol User
+index=main EventCode=3
+
+
+==================================================
+02 - Network Connection Investigation
+==================================================
+
+index=main EventCode=3
+| table _time ComputerName Image SourceIp SourcePort DestinationIp DestinationPort Protocol User
 | sort - _time
+
+
+==================================================
+03 - Kali Connection Detection
+==================================================
+
+index=main EventCode=3 DestinationIp="192.168.189.133"
+| table _time ComputerName Image SourceIp SourcePort DestinationIp DestinationPort Protocol User
+| sort - _time
+
+
+==================================================
+04 - Kali HTTP Connection Detection
+==================================================
+
+index=main EventCode=3 DestinationIp="192.168.189.133" DestinationPort=8080
+| table _time ComputerName Image SourceIp SourcePort DestinationIp DestinationPort Protocol User
+| sort - _time
+
+
+==================================================
+05 - Network Connection Summary
+==================================================
+
+index=main EventCode=3
+| stats count by Image DestinationIp DestinationPort Protocol User
+| sort - count
+
+
+==================================================
+06 - Common Port Investigation
+==================================================
+
+index=main EventCode=3
+| where DestinationPort IN (21,22,23,25,53,80,110,135,139,143,443,445,3389,4444,8080)
+| stats count by Image DestinationIp DestinationPort Protocol User
+| sort - count
