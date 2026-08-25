@@ -1,10 +1,55 @@
-# ==========================================
-# Detection: PowerShell Execution
-# Data Source: Sysmon Event ID 1
-# ==========================================
+==================================================
+PowerShell Execution Detection
+==============================
 
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=1
-Image="*powershell.exe"
-| table _time Image ParentImage CommandLine User
+Purpose:
+Detect PowerShell process creation using Sysmon Event ID 1.
+
+==================================================
+01 - Basic PowerShell Detection
+===============================
+
+index=main EventCode=1
+| search Image="*\powershell.exe"
+
+==================================================
+02 - PowerShell Investigation
+=============================
+
+index=main EventCode=1
+| search Image="*\powershell.exe"
+| table _time ComputerName User Image ParentImage CommandLine
 | sort - _time
+
+==================================================
+03 - Exclude Splunk Universal Forwarder PowerShell
+==================================================
+
+index=main EventCode=1
+| search Image="*\powershell.exe"
+| search NOT ParentImage="*\SplunkUniversalForwarder\*"
+| table _time ComputerName User Image ParentImage CommandLine
+| sort - _time
+
+==================================================
+04 - Suspicious PowerShell Indicators
+=====================================
+
+index=main EventCode=1
+| search Image="*\powershell.exe"
+| search CommandLine="*Invoke-WebRequest*"
+OR CommandLine="*-enc*"
+OR CommandLine="*EncodedCommand*"
+OR CommandLine="*IEX*"
+OR CommandLine="*Invoke-Expression*"
+| table _time ComputerName User Image ParentImage CommandLine
+| sort - _time
+
+==================================================
+05 - PowerShell Event Summary
+=============================
+
+index=main EventCode=1
+| search Image="*\powershell.exe"
+| stats count by ComputerName User Image ParentImage
+| sort - count
