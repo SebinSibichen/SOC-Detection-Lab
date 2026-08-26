@@ -1,10 +1,6 @@
-# ==========================================
-# Detection: Encoded PowerShell Commands
-# ==========================================
-
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=1
-Image="*powershell.exe"
-(CommandLine="*-enc*" OR CommandLine="*-EncodedCommand*")
-| table _time Image ParentImage CommandLine User
+index=main EventCode=1
+| search Image="*\powershell.exe"
+| regex CommandLine="(?i)(-encodedcommand|-encoded|-enc)(\s|$)"
+| where NOT match(Image,"(?i).*SplunkUniversalForwarder.*")
+| table _time ComputerName User Image ParentImage CommandLine ProcessId ProcessGuid
 | sort - _time
