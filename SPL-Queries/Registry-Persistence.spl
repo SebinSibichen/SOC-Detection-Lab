@@ -1,9 +1,30 @@
-# ==========================================
-# Detection: Registry Persistence
-# Sysmon Event ID 13
-# ==========================================
 
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=13
-| table _time Image TargetObject Details User
+---
+
+
+**File:** `SPL-Queries/05-Registry-Persistence.md`
+
+```markdown
+# SPL Query 05 - Registry Persistence
+
+## Query Name
+
+Registry Run Key Persistence Detection
+
+---
+
+## Objective
+
+Detect Windows Registry Run Key modifications using Sysmon Event
+ID 13.
+
+---
+
+## SPL Query
+
+```spl
+index=main EventCode=13
+| search TargetObject="*\\CurrentVersion\\Run\\*"
+| where NOT like(Image,"%SplunkUniversalForwarder%")
+| table _time ComputerName User Image TargetObject Details
 | sort - _time
