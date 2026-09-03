@@ -1,9 +1,87 @@
-# ==========================================
-# Detection: Scheduled Task Creation
-# ==========================================
 
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=1
-(CommandLine="*schtasks*" OR Image="*schtasks.exe")
-| table _time Image ParentImage CommandLine User
+## Query 1 – Scheduled Task Creation Detection
+
+```spl
+index=main EventCode=1
+| search Image="*\\schtasks.exe"
+| search CommandLine="*/create*"
+| where NOT like(Image,"%SplunkUniversalForwarder%")
+| table _time ComputerName User Image ParentImage ParentCommandLine CommandLine
 | sort - _time
+```
+
+### Purpose
+
+Detects Windows Scheduled Task creation using `schtasks.exe`.
+
+The query:
+
+1. Searches Sysmon Process Creation events.
+2. Filters for `schtasks.exe`.
+3. Searches for the `/create` parameter.
+4. Excludes Splunk Universal Forwarder activity.
+5. Displays important investigation fields.
+6. Sorts events from newest to oldest.
+
+---
+
+## Query 2 – Broad schtasks.exe Search
+
+```spl
+index=main EventCode=1
+| search Image="*\\schtasks.exe"
+| table _time ComputerName User Image ParentImage ParentCommandLine CommandLine
+| sort - _time
+```
+
+### Purpose
+
+Provides a broader view of all `schtasks.exe` executions.
+
+This can be useful during investigation when the analyst wants to determine whether the host executed other Scheduled Task commands such as:
+
+```text
+/create
+/delete
+/change
+/run
+/query
+```
+
+---
+
+## Important Investigation Fields
+
+The following fields should be reviewed:
+
+```text
+_time
+ComputerName
+User
+Image
+ParentImage
+ParentCommandLine
+CommandLine
+```
+
+These fields help establish the process execution chain and determine whether the Scheduled Task activity was legitimate or suspicious.
+
+---
+
+## Expected Detection
+
+The primary detection should identify:
+
+```text
+Image:
+C:\Windows\System32\schtasks.exe
+```
+
+and:
+
+```text
+CommandLine:
+... /create ...
+```
+
+The lab successfully returned the Scheduled Task creation event in Splunk.
