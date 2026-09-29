@@ -1,44 +1,89 @@
-# T1543 - Create or Modify System Process
+# MITRE ATT&CK Mapping — Service Creation
 
-## ATT&CK Tactic
+## Technique
 
-Persistence
+**T1543.003 — Create or Modify System Process: Windows Service**
 
-## Description
+## Tactic
 
-Attackers create or modify Windows services to maintain persistence.
+**Persistence**
 
-## Detection Rule
+## Secondary Relevance
 
-Service Creation
+**Privilege Escalation**
 
-## Relevant Log Sources
+## Observed Behavior
 
-- Windows System Log
+The lab generated a Windows service creation command:
 
-## Event IDs
+```text
+sc.exe create SOC_Lab_Service
+```
 
-- Event ID 7045
+The executable used for the service was:
 
-## Detection Logic
+```text
+C:\Windows\System32\notepad.exe
+```
 
-Detect newly installed Windows services.
+The process responsible for the service creation was:
 
-## Investigation Steps
+```text
+C:\Windows\System32\sc.exe
+```
 
-- Verify service name.
-- Review executable path.
-- Check service account.
-- Confirm digital signature.
+The parent process was:
 
-## SPL Query
+```text
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+```
 
-Services-Creation.spl
+## Telemetry
 
-## MITRE ATT&CK
+Sysmon:
 
-Technique: T1543
+```text
+Event ID 1 — Process Creation
+```
 
-## References
+Splunk fields:
 
-https://attack.mitre.org/techniques/T1543/
+```text
+Image
+CommandLine
+ParentImage
+ParentCommandLine
+User
+ComputerName
+```
+
+## Detection Relationship
+
+The SOC detection searches for:
+
+```text
+sc.exe
++
+create
+```
+
+This identifies process activity associated with Windows service creation.
+
+## Investigation Considerations
+
+A real-world alert should be investigated by checking:
+
+* Service name
+* Service executable
+* Service account
+* Creating user
+* Parent process
+* Command line
+* Creation time
+* File reputation
+* Whether the service is expected
+* Related activity before and after service creation
+
+## Lab Classification
+
+**Benign — Controlled SOC Lab Simulation**
