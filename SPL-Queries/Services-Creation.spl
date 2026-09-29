@@ -3,7 +3,10 @@
 # Security Event ID 7045
 # ==========================================
 
-source="WinEventLog:System"
-EventCode=7045
-| table _time Service_Name Image_Path Service_Type Account_Name
+index=main EventCode=1
+| search Image="*\sc.exe"
+| search CommandLine="*create*"
+| where NOT like(Image,"%SplunkUniversalForwarder%")
+| table _time ComputerName User Image ParentImage ParentCommandLine CommandLine
 | sort - _time
+
