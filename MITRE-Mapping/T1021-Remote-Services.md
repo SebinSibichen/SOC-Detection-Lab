@@ -1,45 +1,89 @@
-# T1021 - Remote Services
+# MITRE ATT&CK Mapping - RDP Logon
 
-## ATT&CK Tactic
+## Technique
 
-Lateral Movement
+**T1021.001 - Remote Services: Remote Desktop Protocol**
 
-## Description
+## Tactic
 
-Adversaries may use Remote Desktop Protocol (RDP) or other remote services to move laterally within a network.
+**Lateral Movement**
 
-## Detection Rule
+## Technique Description
 
-Remote Desktop Detection
+Adversaries may use Remote Desktop Protocol (RDP) to remotely access Windows systems.
 
-## Relevant Log Sources
+In this lab, an RDP connection was established from the Kali Linux system to the Windows target machine.
 
-- Windows Security Log
+## Lab Activity
 
-## Event IDs
+```text
+Kali Linux
+    |
+    | RDP Connection
+    v
+Windows Target
+    |
+    | Security Event 4624
+    | Logon Type 10
+    v
+Splunk
+```
 
-- Security Event ID 4624 (Logon Type 10)
+## Detection Evidence
 
-## Detection Logic
+The Windows Security log generated:
 
-Monitor successful Remote Desktop logons and identify unusual source systems.
+```text
+Event ID: 4624
+Logon Type: 10
+```
 
-## Investigation Steps
+Microsoft identifies Logon Type 10 as `RemoteInteractive`, corresponding to Remote Desktop/Terminal Services logons.
 
-- Verify source IP address.
-- Confirm user legitimacy.
-- Review login time.
-- Identify multiple logins.
-- Check subsequent activity.
+## Detection Method
 
-## SPL Query
+Splunk searches for:
 
-Remote-Desktop.spl
+```spl
+index=main EventCode=4624 Logon_Type=10
+```
 
-## MITRE ATT&CK
+## Relevant Telemetry
 
-Technique: T1021
+| Telemetry              | Purpose                       |
+| ---------------------- | ----------------------------- |
+| Event ID 4624          | Successful logon              |
+| Logon Type 10          | RemoteInteractive/RDP         |
+| Account Name           | Identifies logged-on account  |
+| Computer Name          | Identifies target             |
+| IP Address             | Identifies source address     |
+| Workstation Name       | Identifies source workstation |
+| Logon Process          | Authentication process        |
+| Authentication Package | Authentication mechanism      |
 
-## References
+## SOC Investigation
 
-https://attack.mitre.org/techniques/T1021/
+A SOC analyst should correlate the RDP event with:
+
+* Failed logons
+* Privileged logons
+* Process creation
+* PowerShell execution
+* Network connections
+* Persistence activity
+* Additional authentication events
+
+## Detection Objective
+
+Identify successful RDP connections and provide analysts with sufficient authentication and network information to determine whether the remote access was authorized.
+
+## ATT&CK Mapping Summary
+
+| Field               | Value                                    |
+| ------------------- | ---------------------------------------- |
+| Tactic              | Lateral Movement                         |
+| Technique           | T1021.001                                |
+| Technique Name      | Remote Services: Remote Desktop Protocol |
+| Windows Event       | 4624                                     |
+| Detection Indicator | Logon Type 10                            |
+| SIEM                | Splunk                                   |
