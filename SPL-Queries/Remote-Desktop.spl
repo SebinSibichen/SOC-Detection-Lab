@@ -1,10 +1,62 @@
-# ==========================================
-# Detection: Remote Desktop Logons
-# Security Event ID 4624
-# ==========================================
+# RDP Logon Detection Queries
 
-source="WinEventLog:Security"
-EventCode=4624
-Logon_Type=10
-| table _time Account_Name Workstation_Name Source_Network_Address
+## 1. Primary RDP Detection
+
+```spl
+index=main EventCode=4624
+| search Logon_Type=10
+| table _time ComputerName Account_Domain Account_Name Logon_Type Logon_Process Authentication_Package IpAddress Workstation_Name
 | sort - _time
+```
+
+## 2. RDP Detection With Full Event Information
+
+```spl
+index=main EventCode=4624
+| search Logon_Type=10
+| table _time ComputerName Account_Domain Account_Name Logon_Type Logon_Process Authentication_Package IpAddress Workstation_Name Logon_ID Message
+| sort - _time
+```
+
+## 3. Count RDP Logons
+
+```spl
+index=main EventCode=4624
+| search Logon_Type=10
+| stats count by Account_Name IpAddress ComputerName
+| sort - count
+```
+
+## 4. Investigate All Successful Logon Types
+
+Use this query to determine which logon types are being ingested:
+
+```spl
+index=main EventCode=4624
+| stats count by Logon_Type
+| sort - count
+```
+
+## 5. Search for RDP Events Using Raw Event Text
+
+If the extracted `Logon_Type` field is unavailable:
+
+```spl
+index=main EventCode=4624
+| search "Logon Type: 10"
+| table _time ComputerName Account_Name Message
+| sort - _time
+```
+
+## Expected Detection
+
+The primary query should return an event similar to:
+
+```text
+EventCode: 4624
+Logon_Type: 10
+ComputerName: TargetMachine
+Account_Name: a4803
+```
+
+Logon Type 10 corresponds to RemoteInteractive/RDP logons.
