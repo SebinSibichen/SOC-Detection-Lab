@@ -1,11 +1,71 @@
-# ==========================================
-# Detection: Suspicious Parent-Child Processes
-# ==========================================
+# Suspicious Parent-Child — SPL Queries
 
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=1
-ParentImage="*winword.exe"
-OR ParentImage="*excel.exe"
-OR ParentImage="*outlook.exe"
-| table _time ParentImage Image CommandLine User
+## Query 1: Verify Sysmon Process Creation
+
+```spl
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| table _time ComputerName User ParentImage Image CommandLine
 | sort - _time
+```
+
+Purpose: Confirm that Sysmon process-creation events contain the required fields.
+
+## Query 2: Find Command Prompt Process Creation
+
+```spl
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| search Image="*cmd.exe"
+| table _time ComputerName User ParentImage Image CommandLine
+| sort - _time
+```
+
+Purpose: Find process-creation events involving Command Prompt.
+
+## Query 3: Detect Office Applications Launching Scripting Tools
+
+```spl
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| eval ParentProcess=lower(ParentImage), ChildProcess=lower(Image)
+| where (
+    like(ParentProcess, "%\\winword.exe")
+    OR like(ParentProcess, "%\\excel.exe")
+    OR like(ParentProcess, "%\\powerpnt.exe")
+    OR like(ParentProcess, "%\\outlook.exe")
+)
+| where (
+    like(ChildProcess, "%\\powershell.exe")
+    OR like(ChildProcess, "%\\pwsh.exe")
+    OR like(ChildProcess, "%\\cmd.exe")
+    OR like(ChildProcess, "%\\wscript.exe")
+    OR like(ChildProcess, "%\\cscript.exe")
+    OR like(ChildProcess, "%\\mshta.exe")
+)
+| table _time ComputerName User ParentImage Image CommandLine
+| sort - _time
+```
+
+Purpose: Identify selected Office-to-script process relationships.
+
+## Query 4: Summarize Observed Parent-Child Relationships
+
+```spl
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| stats count by ParentImage Image
+| sort - count
+| head 50
+```
+
+Purpose: Establish a baseline of common process relationships on the endpoint.
+
+## Query 5: Verify the Controlled PowerShell-to-CMD Test
+
+```spl
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| eval ParentProcess=lower(ParentImage), ChildProcess=lower(Image)
+| where like(ParentProcess, "%\\powershell.exe")
+    AND like(ChildProcess, "%\\cmd.exe")
+| table _time ComputerName User ParentImage Image CommandLine
+| sort - _time
+```
+
+Purpose: Verify the benign PowerShell-to-CMD test if the event was generated and ingested.
