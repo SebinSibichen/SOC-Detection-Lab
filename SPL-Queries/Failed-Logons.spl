@@ -1,9 +1,61 @@
-# ==========================================
-# Detection: Failed Login Attempts
-# Security Event ID 4625
-# ==========================================
+# Failed Logon Detection - SPL Queries
 
-source="WinEventLog:Security"
-EventCode=4625
-| stats count by Account_Name Source_Network_Address Failure_Reason
+## 1. Find Failed Logons
+
+```spl
+index=main EventCode=4625
+| table _time ComputerName Account_Name Account_Domain Logon_Type Failure_Reason IpAddress Status Sub_Status
+| sort - _time
+```
+
+## 2. View Complete Failed-Logon Events
+
+```spl
+index=main EventCode=4625
+| table _time ComputerName Message
+| sort - _time
+```
+
+## 3. Count Failed Logons by Account
+
+```spl
+index=main EventCode=4625
+| stats count by Account_Name ComputerName
 | sort - count
+```
+
+## 4. Count Failed Logons by Source Address
+
+```spl
+index=main EventCode=4625
+| stats count by IpAddress ComputerName
+| sort - count
+```
+
+## 5. Investigate Failed Logon Types
+
+```spl
+index=main EventCode=4625
+| stats count by Logon_Type
+| sort - count
+```
+
+## 6. Investigate a Possible Brute-Force Pattern
+
+```spl
+index=main EventCode=4625
+| bin _time span=5m
+| stats count as failed_attempts values(Account_Name) as accounts by _time IpAddress ComputerName
+| where failed_attempts >= 5
+| sort - failed_attempts
+```
+
+This query identifies five or more failed-logon events grouped into a five-minute interval by source address and destination host.
+
+**Note:** This is a starting point, not a definitive brute-force detector. Validate the extracted source IP field, tune the threshold to the environment, and account for legitimate authentication failures before treating a result as an alert.
+
+## Expected Evidence
+
+The search should identify Windows Security Event ID 4625 records and expose relevant account, logon, failure, and source-address information.
+
+The supplied screenshots show five events in the Splunk search results.
