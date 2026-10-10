@@ -1,44 +1,80 @@
-# T1110 - Brute Force
+# MITRE ATT&CK Mapping - Failed Logon Detection
 
-## ATT&CK Tactic
+## Technique
+
+**T1110 - Brute Force**
+
+## Tactic
 
 Credential Access
 
-## Description
+## Technique Overview
 
-Attackers attempt multiple password guesses to compromise user accounts.
+Brute-force activity involves attempting to obtain valid credentials through repeated authentication attempts.
 
-## Detection Rule
+Windows Security Event ID 4625 can provide useful telemetry for detecting failed authentication activity. However, an individual failure does not prove a brute-force attack.
 
-Failed Logons
+## Lab Activity
 
-## Relevant Log Sources
+The lab collected and investigated a Windows failed-logon event.
 
-- Windows Security Log
+```text
+Windows Target
+      |
+      | Security Event ID 4625
+      v
+Splunk Universal Forwarder
+      |
+      v
+Splunk Enterprise
+      |
+      v
+Failed Logon Detection
+      |
+      v
+SOC Investigation
+```
 
-## Event IDs
+## Detection Evidence
 
-- Security Event ID 4625
+| Field                   | Value                       |
+| ----------------------- | --------------------------- |
+| Windows Event ID        | 4625                        |
+| Event Description       | An account failed to log on |
+| Observed Logon Type     | 2                           |
+| Observed Source Address | 127.0.0.1                   |
+| SIEM                    | Splunk Enterprise           |
 
-## Detection Logic
+## Detection Query
 
-Detect repeated failed login attempts.
+```spl
+index=main EventCode=4625
+| stats count by Account_Name IpAddress ComputerName
+| sort - count
+```
 
-## Investigation Steps
+## SOC Investigation
 
-- Count failed logins.
-- Identify targeted account.
-- Review source IP.
-- Check login frequency.
+A SOC analyst should:
 
-## SPL Query
+* Identify the account associated with the failure.
+* Review the source address and logon type.
+* Search for repeated authentication failures.
+* Identify whether failures target one account or many accounts.
+* Correlate failures with successful logons.
+* Investigate related process and network activity.
 
-Failed-Logons.spl
+## ATT&CK Mapping Summary
 
-## MITRE ATT&CK
+| Field          | Value                            |
+| -------------- | -------------------------------- |
+| Tactic         | Credential Access                |
+| Technique      | T1110                            |
+| Technique Name | Brute Force                      |
+| Telemetry      | Windows Security Event ID 4625   |
+| SIEM           | Splunk Enterprise                |
+| Lab Status     | Failed-logon telemetry collected |
 
-Technique: T1110
+## Mapping Limitation
 
-## References
-
-https://attack.mitre.org/techniques/T1110/
+The observed event confirms a failed logon, not a brute-force attack. T1110 is the relevant detection objective for identifying patterns of repeated authentication attempts, but additional evidence is needed to establish that technique.
