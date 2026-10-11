@@ -1,44 +1,43 @@
-# T1218 - Signed Binary Proxy Execution
+# MITRE ATT&CK Mapping — Detection Rule 11
 
-## ATT&CK Tactic
+## Overview
 
-Defense Evasion
+Living Off The Land Binaries (LOLBins) are legitimate system utilities that may be abused to perform actions such as transferring files, executing scripts, or loading components.
 
-## Description
+The appropriate MITRE ATT&CK mapping depends on the actual behavior observed. A binary name alone does not establish a specific technique.
 
-Attackers abuse legitimate Microsoft-signed binaries to execute malicious code.
+## Candidate Techniques
 
-## Detection Rule
+| Technique                               | ID        | When it may apply                                                        |
+| --------------------------------------- | --------- | ------------------------------------------------------------------------ |
+| System Binary Proxy Execution: Rundll32 | T1218.011 | Rundll32 is used to proxy execution of a malicious payload or component. |
+| System Binary Proxy Execution: Regsvr32 | T1218.010 | Regsvr32 is abused to execute a malicious component or scriptlet.        |
+| System Binary Proxy Execution: Mshta    | T1218.005 | Mshta is used to execute malicious HTA or script content.                |
+| Ingress Tool Transfer                   | T1105     | Evidence shows a tool or file being transferred into the environment.    |
+| Deobfuscate/Decode Files or Information | T1140     | Evidence shows encoded content being decoded or deobfuscated.            |
 
-Living-Off-The-Land Binaries
+These are candidate mappings for future validated detections, not confirmed mappings for the current benign test.
 
-## Relevant Log Sources
+## Observed Lab Activity
 
-- Sysmon
+The confirmed event involved:
 
-## Event IDs
+* `certutil.exe`
+* Command line: `certutil.exe -?`
+* Parent: PowerShell
+* Sysmon Event ID: 1
 
-- Sysmon Event ID 1
+The command requested help output. It did not demonstrate proxy execution, file transfer, or decoding.
 
-## Detection Logic
+## Mapping Decision
 
-Monitor execution of LOLBins such as certutil.exe, regsvr32.exe and mshta.exe.
+**Confirmed technique for the observed event:** None assigned.
 
-## Investigation Steps
+The event establishes process execution only. Technique mapping should be assigned when the observed behavior and supporting evidence justify it.
 
-- Review executable.
-- Analyze command line.
-- Check parent process.
-- Verify downloaded files.
+## Detection Improvements
 
-## SPL Query
-
-Living-Off-The-Land.spl
-
-## MITRE ATT&CK
-
-Technique: T1218
-
-## References
-
-https://attack.mitre.org/techniques/T1218/
+* Retain process image and command-line telemetry.
+* Examine parent-child process relationships.
+* Correlate suspicious command lines with network and file activity.
+* Document the evidence supporting each technique assignment.
