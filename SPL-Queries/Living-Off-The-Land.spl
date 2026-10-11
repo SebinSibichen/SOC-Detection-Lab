@@ -1,13 +1,53 @@
-# ==========================================
-# Detection: LOLBins
-# ==========================================
+# Detection Rule 11 — LOLBins SPL Queries
 
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=1
-(Image="*certutil.exe"
-OR Image="*bitsadmin.exe"
-OR Image="*regsvr32.exe"
-OR Image="*mshta.exe"
-OR Image="*rundll32.exe")
-| table _time Image ParentImage CommandLine User
+# Data source: Sysmon Event ID 1
+
+# Index: main
+
+# --------------------------------------------------
+
+# QUERY 1: Hunt for selected LOLBin process executions
+
+# --------------------------------------------------
+
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| eval Process=lower(Image), CmdLine=lower(CommandLine)
+| where like(Process, "%\certutil.exe")
+OR like(Process, "%\bitsadmin.exe")
+OR like(Process, "%\mshta.exe")
+OR like(Process, "%\regsvr32.exe")
+OR like(Process, "%\rundll32.exe")
+| table _time ComputerName User ParentImage Image CommandLine
+| sort - _time
+
+# --------------------------------------------------
+
+# QUERY 2: Hunt for selected suspicious command lines
+
+# --------------------------------------------------
+
+index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
+| eval Process=lower(Image), CmdLine=lower(CommandLine)
+| where
+(like(Process, "%\certutil.exe")
+AND (like(CmdLine, "%urlcache%")
+OR like(CmdLine, "%decode%")
+OR like(CmdLine, "%http://%")
+OR like(CmdLine, "%https://%")))
+OR (like(Process, "%\bitsadmin.exe")
+AND (like(CmdLine, "%/transfer%")
+OR like(CmdLine, "%/download%")))
+OR (like(Process, "%\mshta.exe")
+AND (like(CmdLine, "%http://%")
+OR like(CmdLine, "%https://%")
+OR like(CmdLine, "%javascript:%")))
+OR (like(Process, "%\regsvr32.exe")
+AND (like(CmdLine, "%http://%")
+OR like(CmdLine, "%https://%")
+OR like(CmdLine, "%scrobj.dll%")))
+OR (like(Process, "%\rundll32.exe")
+AND (like(CmdLine, "%javascript:%")
+OR like(CmdLine, "%http://%")
+OR like(CmdLine, "%https://%")))
+| table _time ComputerName User ParentImage Image CommandLine
 | sort - _time
