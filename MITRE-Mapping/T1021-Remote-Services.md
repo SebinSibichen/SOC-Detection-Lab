@@ -1,89 +1,40 @@
-# MITRE ATT&CK Mapping - RDP Logon
+# MITRE ATT&CK Mapping — Remote Desktop
 
-## Technique
+## Detection Overview
 
-**T1021.001 - Remote Services: Remote Desktop Protocol**
+This detection investigates Remote Desktop Protocol (RDP) logon activity on the Windows endpoint.
 
-## Tactic
+## ATT&CK Mapping
 
-**Lateral Movement**
+| Field                      | Details                                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| Official ATT&CK Identifier | T1021.001 — Conditional                                                                      |
+| Official Technique Name    | Remote Services: Remote Desktop Protocol                                                     |
+| Tactic                     | Lateral Movement                                                                             |
+| Supporting Event           | Windows Security Event ID 4624 — Successful logon                                            |
+| Supporting Fields          | `TargetUserName`, `LogonType`, `IpAddress`, `WorkstationName`, `TargetDomainName`, timestamp |
+| Key Indicator              | Logon Type 10 supports a Remote Interactive logon                                            |
+| Mapping Confidence         | Conditional; depends on the context of the remote session                                    |
+| Validation Status          | RDP-related logon telemetry observed; assess authorization and the focused detection         |
 
-## Technique Description
+## Mapping Rationale
 
-Adversaries may use Remote Desktop Protocol (RDP) to remotely access Windows systems.
+RDP is a remote access mechanism that can be abused for lateral movement. Windows Security Event ID 4624 with Logon Type 10 can provide evidence of a successful Remote Interactive logon.
 
-In this lab, an RDP connection was established from the Kali Linux system to the Windows target machine.
+The event should be correlated with the source address, account, host, and surrounding activity to determine whether the session is relevant to a security investigation.
 
-## Lab Activity
+## What the Evidence Does Not Demonstrate
 
-```text
-Kali Linux
-    |
-    | RDP Connection
-    v
-Windows Target
-    |
-    | Security Event 4624
-    | Logon Type 10
-    v
-Splunk
-```
+* That the logon was unauthorized.
+* That the account was compromised.
+* That lateral movement by an adversary occurred.
+* That malicious commands were executed during the session.
+* That the remote session resulted in compromise.
 
-## Detection Evidence
+## Validation Notes
 
-The Windows Security log generated:
+Confirm the logon type and inspect the account, source address, and destination host. Distinguish an authorized administrative session from activity that warrants escalation.
 
-```text
-Event ID: 4624
-Logon Type: 10
-```
+## Official Reference
 
-Microsoft identifies Logon Type 10 as `RemoteInteractive`, corresponding to Remote Desktop/Terminal Services logons.
-
-## Detection Method
-
-Splunk searches for:
-
-```spl
-index=main EventCode=4624 Logon_Type=10
-```
-
-## Relevant Telemetry
-
-| Telemetry              | Purpose                       |
-| ---------------------- | ----------------------------- |
-| Event ID 4624          | Successful logon              |
-| Logon Type 10          | RemoteInteractive/RDP         |
-| Account Name           | Identifies logged-on account  |
-| Computer Name          | Identifies target             |
-| IP Address             | Identifies source address     |
-| Workstation Name       | Identifies source workstation |
-| Logon Process          | Authentication process        |
-| Authentication Package | Authentication mechanism      |
-
-## SOC Investigation
-
-A SOC analyst should correlate the RDP event with:
-
-* Failed logons
-* Privileged logons
-* Process creation
-* PowerShell execution
-* Network connections
-* Persistence activity
-* Additional authentication events
-
-## Detection Objective
-
-Identify successful RDP connections and provide analysts with sufficient authentication and network information to determine whether the remote access was authorized.
-
-## ATT&CK Mapping Summary
-
-| Field               | Value                                    |
-| ------------------- | ---------------------------------------- |
-| Tactic              | Lateral Movement                         |
-| Technique           | T1021.001                                |
-| Technique Name      | Remote Services: Remote Desktop Protocol |
-| Windows Event       | 4624                                     |
-| Detection Indicator | Logon Type 10                            |
-| SIEM                | Splunk                                   |
+https://attack.mitre.org/techniques/T1021/001/
