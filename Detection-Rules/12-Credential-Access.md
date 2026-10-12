@@ -1,21 +1,65 @@
-# Detection Rule 12 – Credential Access
+# DET-012 — Credential Access Enumeration
+
+## Rule Overview
+
+| Field            | Value                                     |
+| ---------------- | ----------------------------------------- |
+| Rule ID          | DET-012                                   |
+| Rule Name        | Windows Credential Store Enumeration      |
+| Category         | Credential Access                         |
+| Initial Severity | Medium — investigate and validate context |
+| Data Source      | Sysmon Operational                        |
+| Event ID         | 1 — Process Create                        |
+| Platform         | Windows                                   |
+| Status           | Validated for the observed VaultCmd event |
 
 ## Objective
-Detect potential credential dumping activity.
 
-## MITRE ATT&CK
-T1003
+Identify executions of `cmdkey.exe` and `vaultcmd.exe` that may indicate credential-store enumeration and warrant further investigation.
 
-## SPL Query
+## Detection Logic
 
-```spl
-source="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-EventCode=10
-| table _time SourceImage TargetImage GrantedAccess User
-```
+Monitor Sysmon Process Create events for:
 
-## Investigation
-Look for access to lsass.exe or other credential stores.
+* `cmdkey.exe`
+* `vaultcmd.exe`
 
-## Screenshot
-Screenshots/Detection-12/
+Capture the executable path, command line, parent process, user, host, and event timestamp.
+
+## Observed Evidence
+
+The validated event contained:
+
+* Process: `VaultCmd.exe`
+* Command: `/list`
+* Parent: `powershell.exe`
+* Host: `TargetMachine`
+* Event ID: 1
+* Record Number: `80057`
+
+## Investigation Guidance
+
+When an event is detected:
+
+1. Review the complete command line.
+2. Identify the parent process and the process that launched it.
+3. Confirm the user and host involved.
+4. Check whether the activity aligns with an approved administrative task.
+5. Correlate with other available telemetry before determining whether the activity is suspicious.
+6. Escalate for further investigation if additional evidence suggests unauthorized credential access.
+
+## False Positives
+
+Legitimate administrative troubleshooting, credential management, and system maintenance may execute these utilities.
+
+## Limitations
+
+This rule identifies selected process executions. It does not independently prove that credentials were extracted, disclosed, or misused.
+
+It does not detect every possible credential-access technique.
+
+## Validation Status
+
+**Validated:** The supplied evidence confirms that `VaultCmd.exe /list` was recorded by Sysmon and returned by the Splunk hunting query.
+
+**Not established:** Malicious intent, credential extraction, or compromise.
