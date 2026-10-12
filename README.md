@@ -229,33 +229,31 @@ Directory names are linked above. Individual files should be opened from their r
 
 ## Detection Modules and Validation Status
 
-The table below summarizes the detection exercises developed during this project. Status labels distinguish observed telemetry from validated detection behavior.
+The table below summarizes the detection exercises developed during this project. Status labels describe the telemetry observed or the current level of detection validation; they do not imply that a detection is production-ready.
 
-| Module | Detection area                         | Primary telemetry                                 | Validation status                                                                             |
-| ------ | -------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 01     | Process Creation                       | Sysmon Event ID 1                                 | Telemetry observed; review focused detection results                                          |
-| 02     | Network Connections                    | Sysmon network events, where configured           | Review event coverage and detection results                                                   |
-| 03     | PowerShell Execution                   | Sysmon process creation                           | Detection developed; retain supporting validation evidence                                    |
-| 04     | Encoded PowerShell                     | Sysmon process creation and command line          | Detection developed; validate matching and benign cases                                       |
-| 05     | Registry Persistence                   | Relevant Sysmon registry events, where configured | Review event coverage and detection results                                                   |
-| 06     | Scheduled Tasks                        | Process creation and relevant task telemetry      | Detection developed; review validation evidence                                               |
-| 07     | Service Creation                       | Sysmon process creation                           | Controlled service-creation activity observed; review detection evidence                      |
-| 08     | RDP Logon                              | Windows Security Event ID 4624                    | RDP logon with Logon Type 10 observed                                                         |
-| 09     | Failed Logon                           | Windows Security Event ID 4625                    | Failed-logon event observed; review detection logic and thresholds                            |
-| 10     | Suspicious Parent-Child Processes      | Sysmon process creation                           | Needs further validation; initial focused search returned no events                           |
-| 11     | Living-off-the-Land Binaries (LOLBins) | Sysmon process creation                           | Broad hunting query validated; focused suspicious-behavior detection needs further validation |
-| 12     | Credential Access                      | Sysmon process creation                           | VaultCmd enumeration observed; credential extraction or compromise not demonstrated           |
+| #  | Detection module                  | Primary telemetry                                     | Validation status                                         |
+| -- | --------------------------------- | ----------------------------------------------------- | --------------------------------------------------------- |
+| 01 | Process Creation                  | Sysmon Event ID 1                                     | Telemetry observed                                        |
+| 02 | Network Connections               | Sysmon network events, where available                | Coverage depends on configured telemetry                  |
+| 03 | PowerShell Activity               | Sysmon Event ID 1; PowerShell logs where configured   | Process execution observed                                |
+| 04 | Encoded PowerShell                | Sysmon Event ID 1                                     | Detection validation in progress                          |
+| 05 | Registry Persistence              | Sysmon registry events, where available               | Event coverage depends on configuration                   |
+| 06 | Scheduled Tasks                   | Sysmon and Windows task-related logs, as configured   | Detection validation in progress                          |
+| 07 | Service Creation                  | Sysmon Event ID 1 and relevant Windows service events | Controlled service-creation activity observed             |
+| 08 | Remote Desktop                    | Windows Security Event ID 4624                        | Successful Type 10 logon observed                         |
+| 09 | Failed Logons                     | Windows Security Event ID 4625                        | Failed-logon telemetry observed                           |
+| 10 | Suspicious Parent–Child Processes | Sysmon Event ID 1                                     | Process relationship telemetry available                  |
+| 11 | Living-off-the-Land Binaries      | Sysmon Event ID 1                                     | `certutil.exe` execution observed                         |
+| 12 | Credential Access Indicators      | Sysmon Event ID 1                                     | Credential-vault enumeration command observed             |
 
 ### How to interpret the statuses
 
-* **Telemetry observed:** The relevant event was seen, but this alone does not prove that the detection is effective.
-* **Broad hunting query validated:** The query returned relevant events, establishing basic visibility.
-* **Needs further validation:** The focused detection has not yet been shown to distinguish the intended behavior reliably.
-* **Detection validated:** Reserve this label for a rule that has been tested against representative matching and non-matching activity, with the results documented.
+- **Telemetry observed / Process execution observed:** Relevant activity was observed in the available event data. This does not, by itself, prove malicious behavior or detection effectiveness.
+- **Coverage depends on configured telemetry / Event coverage depends on configuration:** Visibility depends on which event sources are enabled, collected, and searchable in the lab.
+- **Detection validation in progress:** The detection logic has not yet been fully validated against representative matching and benign activity.
+- **Observed activity:** The described command or event was observed during a controlled lab exercise. This is not, by itself, proof of compromise or a production-ready detection.
 
-The table is intentionally conservative. A successful search, a screenshot of an event, and a validated detection are different levels of evidence.
-
-Update each row when you have verified the corresponding SPL query, supporting events, and expected results.
+This project distinguishes telemetry collection from detection validation. A query returning events, or a screenshot showing an event, is not sufficient on its own to demonstrate that a detection reliably identifies the intended behavior. Statuses should be updated when supporting test results and evidence are available.
 
 ---
 
