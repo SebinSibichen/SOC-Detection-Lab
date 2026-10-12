@@ -1,69 +1,109 @@
-# SOC Incident Report — SOC-IR-011
+# SOC Incident Report — IR-011: Living-Off-The-Land Binary Monitoring
 
-## Incident Details
+## 1. Executive Summary
 
-| Field       | Details                                                |
-| ----------- | ------------------------------------------------------ |
-| Incident ID | SOC-IR-011                                             |
-| Title       | LOLBin Process Execution Investigation                 |
-| Host        | TargetMachine                                          |
-| Data Source | Sysmon Operational                                     |
-| Event ID    | 1                                                      |
-| SIEM        | Splunk Enterprise                                      |
-| Severity    | Informational — benign test                            |
-| Status      | Telemetry validated; suspicious activity not confirmed |
+**Incident ID:** SOC-IR-011
+**Category:** Endpoint Execution / LOLBin Monitoring
+**Environment:** Windows 11 lab endpoint
+**Detection Platform:** Splunk Enterprise
+**Telemetry Source:** Sysmon Operational Log
+**Status:** Detection-development exercise
+**Severity:** Informational — Behavior assessment required
+**Disposition:** LOLBin hunting and detection validation
 
-## Summary
+This exercise investigates the use of legitimate Windows utilities that can be abused for execution, file handling, or other adversary behaviors.
 
-A controlled test was performed to verify whether execution of `certutil.exe` was recorded by Sysmon and forwarded to Splunk.
+The lab includes visibility testing for binaries such as `certutil.exe`, `bitsadmin.exe`, `mshta.exe`, `regsvr32.exe`, and `rundll32.exe`.
 
-The test used the command:
+The observed use of a legitimate utility does not automatically indicate malicious activity.
 
-`certutil.exe -?`
+## 2. Scope and Environment
 
-The resulting process-creation event was visible in Splunk.
+| Attribute       | Details                                       |
+| --------------- | --------------------------------------------- |
+| Endpoint        | `TargetMachine`                               |
+| SIEM index      | `main`                                        |
+| Primary event   | Sysmon Event ID 1                             |
+| Relevant fields | `Image`, `CommandLine`, `ParentImage`, `User` |
 
-## Evidence
+## 3. Detection and Evidence
 
-| Field          | Observed value                                              |
-| -------------- | ----------------------------------------------------------- |
-| Process        | `C:\Windows\System32\certutil.exe`                          |
-| Command line   | `"C:\Windows\system32\certutil.exe" -?`                     |
-| Parent process | `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe` |
-| User           | `TARGETMACHINE\a4803`                                       |
-| Host           | `TargetMachine`                                             |
-| Event ID       | 1                                                           |
-| Record number  | 77624                                                       |
-| Event UTC time | 2026-10-11 17:41:58.797 UTC                                 |
+The broad hunting query identified a `certutil.exe` process event.
 
-## Analysis
+**Observed command:** `"C:\Windows\system32\certutil.exe" -?`
 
-The observed command requested the utility's help output. The event confirms that Sysmon recorded the process and that Splunk ingested the event.
+**Observed timestamp:** [Insert verified timestamp]
+**Event record number:** [Insert verified record number]
+**Parent process:** PowerShell, if confirmed by the recorded event
+**User:** [Insert verified account]
 
-The evidence does not indicate that a file was downloaded, decoded, or executed remotely.
+The command was used to validate visibility into the utility. It should not be classified as malicious decoding or LOLBin abuse based on the available evidence.
 
-The use of `certutil.exe` alone is insufficient to classify the event as malicious.
+## 4. Investigation and Analysis
 
-## Impact
+Review the executable, command line, parent process, and resulting behavior.
 
-No malicious impact was established from this test.
+Determine whether the utility was used for an expected administrative purpose or for behavior requiring further investigation.
 
-## Response
+A focused detection should distinguish suspicious usage from benign commands, including help or usage requests.
 
-* Confirmed process-creation logging.
-* Confirmed that the event was searchable in Splunk.
-* Recorded the process image, command line, user, and parent process.
-* Avoided classifying the benign test as a security incident.
+## 5. MITRE ATT&CK Mapping
 
-## Current Disposition
+Potential techniques depend on the behavior observed:
 
-**Benign test; no confirmed compromise.**
+* T1218.005 — System Binary Proxy Execution: Mshta
+* T1218.010 — System Binary Proxy Execution: Regsvr32
+* T1218.011 — System Binary Proxy Execution: Rundll32
+* T1140 — Deobfuscate/Decode Files or Information, if decoding is demonstrated
+* T1197 — BITS Jobs, if relevant BITS-job abuse is demonstrated
 
-The broader LOLBin hunting query was validated against the observed `certutil.exe` event. Additional testing is required before claiming that the focused suspicious-command-line rule detects malicious activity.
+Official references:
 
-## Follow-up Actions
+https://attack.mitre.org/techniques/T1218/005/
 
-1. Validate the query against additional controlled test cases.
-2. Review potential false positives.
-3. Expand detections only where telemetry and test results support them.
-4. Capture final SPL results and document the validation status.
+https://attack.mitre.org/techniques/T1218/010/
+
+https://attack.mitre.org/techniques/T1218/011/
+
+https://attack.mitre.org/techniques/T1140/
+
+https://attack.mitre.org/techniques/T1197/
+
+## 6. Impact Assessment
+
+* Malicious LOLBin execution: Not established.
+* File decoding: Not established by the `certutil.exe -?` event.
+* Proxy execution: Not established.
+* Command and control: Not established.
+* Data exfiltration: Not established.
+
+## 7. Response and Containment
+
+Do not block or remove legitimate Windows utilities solely because their process events were recorded.
+
+If the command line and resulting behavior support malicious activity, preserve the evidence and follow the appropriate response procedure.
+
+## 8. False-Positive Considerations
+
+Windows utilities are frequently used by administrators, installers, diagnostic tools, and legitimate software.
+
+## 9. Limitations and Evidence Gaps
+
+The broad hunting query established visibility into a utility's process execution. The focused suspicious-behavior detection still requires validation.
+
+## 10. Recommendations
+
+* Retain process and command-line context.
+* Develop behavior-specific detection conditions.
+* Test benign and suspicious examples.
+* Assign ATT&CK techniques only when the observed behavior supports them.
+
+## 11. Final Disposition
+
+**Disposition:** LOLBin visibility and hunting exercise; malicious behavior not established.
+
+**Validation status:** Broad hunting query validated; focused suspicious-behavior detection requires further validation.
+
+**Analyst Notes:** The broad hunting query identified a certutil.exe process launched with the -? argument. This observation confirms process-creation visibility for the utility but does not demonstrate malicious decoding, proxy execution, or other LOLBin abuse. The focused suspicious-behavior detection requires further validation.
+
+
