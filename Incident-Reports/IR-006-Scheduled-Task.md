@@ -1,116 +1,88 @@
+# SOC Incident Report — IR-006: Scheduled Task Monitoring
 
-## Incident Information
+## 1. Executive Summary
 
-| Field          | Details                 |
-| -------------- | ----------------------- |
-| Incident ID    | `SOC-IR-006`            |
-| Detection Rule | `06 – Scheduled Tasks`  |
-| Severity       | Medium                  |
-| Status         | Closed – Lab Simulation |
-| Host           | `TargetMachine`         |
-| User           | `TARGETMACHINE\a4803`   |
-| Event ID       | Sysmon Event ID 1       |
-| Technique      | Scheduled Task/Job      |
+**Incident ID:** SOC-IR-006
+**Category:** Scheduled Execution / Potential Persistence
+**Environment:** Windows 11 lab endpoint
+**Detection Platform:** Splunk Enterprise
+**Telemetry Source:** Sysmon and Windows Task Scheduler logs, where configured
+**Status:** Detection validation exercise
+**Severity:** Informational — Pending task analysis
+**Disposition:** Scheduled-task investigation
 
----
+This exercise investigates scheduled-task-related activity on Windows.
 
-## Incident Summary
+Scheduled tasks are commonly used for maintenance and automation but can also be abused to execute programs or maintain persistence.
 
-A Windows Scheduled Task named `SOC_Lab_ScheduledTask` was created on the target Windows system using the native `schtasks.exe` utility.
+## 2. Scope and Environment
 
-The task was configured to execute:
+| Attribute            | Details                                         |
+| -------------------- | ----------------------------------------------- |
+| Endpoint             | `TargetMachine`                                 |
+| SIEM index           | `main`                                          |
+| Primary telemetry    | Sysmon Event ID 1                               |
+| Additional telemetry | Task Scheduler operational events, if collected |
 
-```text
-C:\Windows\System32\notepad.exe
-```
+## 3. Detection and Evidence
 
-at user logon and run under the `SYSTEM` account.
+Relevant fields include:
 
-The activity was intentionally generated as a benign SOC detection lab simulation.
+* `Image`
+* `CommandLine`
+* `ParentImage`
+* `User`
+* `UtcTime`
+* Task name and action, when available
 
----
+**Observed timestamp:** [Insert verified timestamp]
+**Task name:** [Insert verified name]
+**Task action:** [Insert verified action]
+**Associated process:** [Insert verified process]
 
-## Detection Evidence
+## 4. Investigation and Analysis
 
-Sysmon recorded the process creation activity.
+Review task-creation or modification commands and determine whether the task was successfully registered.
 
-### Process
+Inspect the task's action, trigger, execution account, and configured executable. Where available, correlate process telemetry with Task Scheduler events and task configuration.
 
-```text
-C:\Windows\System32\schtasks.exe
-```
+## 5. MITRE ATT&CK Mapping
 
-### Command Line
+**Technique:** T1053.005 — Scheduled Task/Job: Scheduled Task.
 
-```text
-"C:\Windows\system32\schtasks.exe" /create /tn SOC_Lab_ScheduledTask /tr C:\Windows\System32\notepad.exe /sc ONLOGON /ru SYSTEM
-```
+**Official reference:** https://attack.mitre.org/techniques/T1053/005/
 
-### Parent Process
+## 6. Impact Assessment
 
-```text
-C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-```
+* Task creation: [Confirmed / Not confirmed]
+* Task execution: [Confirmed / Not confirmed]
+* Malicious purpose: Not established without supporting evidence.
+* Persistence: Requires behavior-specific confirmation.
 
-### User
+## 7. Response and Containment
 
-```text
-TARGETMACHINE\a4803
-```
+If a task is confirmed malicious, preserve its configuration and related evidence before disabling or removing it in accordance with the response procedure.
 
----
+## 8. False-Positive Considerations
 
-## Investigation
+Legitimate applications, update services, and system maintenance frequently create scheduled tasks.
 
-The SOC investigation confirmed that:
+## 9. Limitations and Evidence Gaps
 
-1. `schtasks.exe` was executed.
-2. The `/create` parameter was used.
-3. A scheduled task named `SOC_Lab_ScheduledTask` was created.
-4. The task was configured for execution at user logon.
-5. The task was configured to run as `SYSTEM`.
-6. The target executable was the legitimate Windows `notepad.exe`.
-7. The activity was intentionally generated for this security lab.
+A process command that attempts to create a task does not necessarily prove that the task was registered or executed.
 
----
+## 10. Recommendations
 
-## Impact Assessment
+* Correlate task-management commands with Task Scheduler events.
+* Record task actions, triggers, and execution accounts.
+* Validate task creation and execution separately.
+* Preserve evidence before removing suspicious tasks.
 
-No malicious impact was identified.
+## 11. Final Disposition
 
-The scheduled task was created solely for testing the SOC detection pipeline.
+**Disposition:** Scheduled-task monitoring exercise; malicious persistence not established.
 
----
+**Validation status:** [Telemetry observed / Detection validated / Needs further validation]
 
-## Response
+**Analyst Notes:** Scheduled-task activity should be investigated using the task-management command line and, where available, Task Scheduler events and task configuration. Task creation, successful execution, and malicious intent should be assessed separately. The presence of a task-management command alone does not confirm persistence.
 
-The scheduled task was removed after completing the investigation.
-
-Cleanup command:
-
-```powershell
-schtasks /delete /tn "SOC_Lab_ScheduledTask" /f
-```
-
----
-
-## Final Classification
-
-**Classification:** Benign – Authorized SOC Lab Simulation
-
-**Final Status:** Closed
-
----
-
-## Lessons Learned
-
-This investigation demonstrates how a SOC analyst can:
-
-* Detect Scheduled Task creation.
-* Identify the process responsible.
-* Investigate the command line.
-* Identify the parent process.
-* Identify the user account.
-* Determine the executable associated with the task.
-* Map the activity to MITRE ATT&CK.
-* Distinguish legitimate administrative activity from potentially malicious persistence.
