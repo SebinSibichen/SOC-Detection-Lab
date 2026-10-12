@@ -1,146 +1,39 @@
-# MITRE ATT&CK Mapping – Scheduled Tasks
+# MITRE ATT&CK Mapping — Scheduled Tasks
 
-## Primary Technique
+## Detection Overview
 
-### T1053.005 – Scheduled Task/Job: Scheduled Task
-
-**Tactic:**
-
-* Persistence
-* Execution
-
-The Windows Scheduled Task created during this lab maps to **T1053.005 – Scheduled Task**.
-
----
-
-## Technique Description
-
-Scheduled Tasks can be used by attackers to execute programs automatically according to a configured trigger.
-
-Attackers may create or modify scheduled tasks to maintain persistence or execute malicious programs.
-
-In this lab, the native Windows `schtasks.exe` utility was used to create a scheduled task configured to execute `notepad.exe` at user logon.
-
----
-
-## Lab Evidence
-
-### Command Used
-
-```powershell
-schtasks /create /tn "SOC_Lab_ScheduledTask" /tr "C:\Windows\System32\notepad.exe" /sc ONLOGON /ru SYSTEM
-```
-
-### Scheduled Task
-
-```text
-SOC_Lab_ScheduledTask
-```
-
-### Trigger
-
-```text
-ONLOGON
-```
-
-### Run As
-
-```text
-SYSTEM
-```
-
-### Executable
-
-```text
-C:\Windows\System32\notepad.exe
-```
-
----
-
-## Detection Evidence
-
-Sysmon generated:
-
-```text
-Event ID 1 – Process Create
-```
-
-with:
-
-```text
-Image:
-C:\Windows\System32\schtasks.exe
-```
-
-and:
-
-```text
-CommandLine:
-... /create /tn SOC_Lab_ScheduledTask ...
-```
-
-The parent process was:
-
-```text
-C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-```
-
----
+This detection investigates scheduled-task-related activity that may be used to automate execution or maintain persistence on Windows.
 
 ## ATT&CK Mapping
 
-| Field            | Value                      |
-| ---------------- | -------------------------- |
-| Tactic           | Persistence                |
-| Tactic           | Execution                  |
-| Technique        | T1053 – Scheduled Task/Job |
-| Sub-technique    | T1053.005 – Scheduled Task |
-| Platform         | Windows                    |
-| Detection Source | Sysmon                     |
-| Sysmon Event     | Event ID 1                 |
-| Tool             | `schtasks.exe`             |
+| Field                      | Details                                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| Official ATT&CK Identifier | T1053.005                                                                                 |
+| Official Technique Name    | Scheduled Task/Job: Scheduled Task                                                        |
+| Tactic                     | Execution; Persistence; Privilege Escalation                                              |
+| Supporting Events          | Sysmon Event ID 1; relevant Task Scheduler events when collected                          |
+| Supporting Fields          | `Image`, `CommandLine`, `ParentImage`, task name, task action, trigger, `User`, `UtcTime` |
+| Mapping Confidence         | Appropriate when scheduled-task behavior is observed                                      |
+| Validation Status          | Confirm creation or modification and test the focused detection                           |
 
----
+## Mapping Rationale
 
-## Detection Relationship
+Windows scheduled tasks can execute programs or scripts in response to defined triggers.
 
-```text
-T1053
-Scheduled Task/Job
-        ↓
-T1053.005
-Scheduled Task
-        ↓
-schtasks.exe
-        ↓
-Sysmon Event ID 1
-        ↓
-Splunk Detection Rule 06
-```
+Process telemetry involving `schtasks.exe` can help identify task-management commands. Task Scheduler events and task configuration provide stronger evidence of actual task creation, modification, or execution.
 
----
+## What the Evidence Does Not Demonstrate
 
-## Security Relevance
+* That a task was successfully created.
+* That a scheduled task executed.
+* That the task was malicious.
+* That an attacker established persistence.
+* That privilege escalation occurred.
 
-Scheduled Task creation is not inherently malicious because Windows and legitimate software frequently use scheduled tasks.
+## Validation Notes
 
-However, unexpected tasks should be investigated for:
+Where possible, correlate process-creation events with Task Scheduler operational events and the resulting task configuration. Distinguish commands that attempt to create tasks from evidence confirming that a task exists.
 
-* Suspicious task names
-* Unknown executables
-* PowerShell or command shell execution
-* Execution from temporary directories
-* User-created tasks
-* SYSTEM-level execution
-* Unusual logon or time-based triggers
-* Suspicious parent-child process relationships
+## Official Reference
 
----
-
-## Lab Classification
-
-**Technique Demonstrated:** T1053.005
-
-**Activity Type:** Benign SOC Detection Simulation
-
-**Detection Status:** Successfully Detected
+https://attack.mitre.org/techniques/T1053/005/
