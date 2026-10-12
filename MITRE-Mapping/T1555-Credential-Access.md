@@ -1,40 +1,45 @@
-# Module 12 — MITRE ATT&CK Mapping
+# MITRE ATT&CK Mapping — Credential Access
 
-## Primary Candidate Technique
+## Detection Overview
 
-### T1555.004 — Credentials from Password Stores: Windows Credential Manager
+This detection investigates processes that enumerate Windows credential-related stores or targets.
 
-* **Tactic:** Credential Access
-* **Platform:** Windows
-* **Observed process:** `VaultCmd.exe`
-* **Observed command:** `/list`
+The lab includes observations involving `VaultCmd.exe /list` and `cmdkey.exe /list`.
 
-**Mapping rationale:** The lab observed a command that enumerates available Windows Vaults. This behavior is relevant to investigating attempts to access credentials stored in Windows Credential Manager.
+## ATT&CK Mapping
 
-**Evidence limitation:** The observed `/list` command enumerated Vaults. The supplied event does not prove that stored credentials were extracted.
+| Field                      | Details                                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Official ATT&CK Identifier | T1555.004 — Candidate                                                                                            |
+| Official Technique Name    | Credentials from Password Stores: Windows Credential Manager                                                     |
+| Tactic                     | Credential Access                                                                                                |
+| Supporting Event           | Sysmon Event ID 1 — Process Create                                                                               |
+| Supporting Fields          | `Image`, `CommandLine`, `ParentImage`, `User`, `UtcTime`                                                         |
+| Observed Activity          | `VaultCmd.exe /list`; `cmdkey.exe /list` was also tested                                                         |
+| Mapping Confidence         | Candidate; enumeration is observed, but credential extraction is not demonstrated                                |
+| Validation Status          | VaultCmd enumeration event observed; focused detection and credential-access behavior require further validation |
 
-## Related Candidate Technique
+## Mapping Rationale
 
-### T1555 — Credentials from Password Stores
+Windows Credential Manager stores credentials used by applications and Windows services. ATT&CK T1555.004 concerns adversary access to credentials from Windows Credential Manager.
 
-This parent technique describes attempts to obtain credentials from common password-storage locations.
+Process-creation events showing credential-related enumeration commands provide useful evidence of activity involving these stores. However, enumeration alone does not establish that stored credentials were retrieved.
 
-It provides broader context for the lab but should not be interpreted as proof that credentials were obtained.
+## What the Evidence Does Not Demonstrate
 
-## Evidence-to-Technique Assessment
+* That stored passwords were extracted.
+* That any credential was compromised.
+* That credentials were transmitted to another system.
+* That the observed command was executed by an attacker.
+* That the account was used for unauthorized access.
+* That credential theft succeeded.
 
-| Evidence                     | Assessment       |
-| ---------------------------- | ---------------- |
-| `VaultCmd.exe /list`         | Observed         |
-| Sysmon Event ID 1            | Confirmed        |
-| Splunk event returned        | Confirmed        |
-| Credential-store enumeration | Observed         |
-| Credential extraction        | Not demonstrated |
-| Credential misuse            | Not demonstrated |
-| Confirmed compromise         | Not established  |
+## Validation Notes
 
-## Conclusion
+The lab observed a `VaultCmd.exe /list` process event. The command enumerates credential-vault information; this is not evidence of password extraction.
 
-Map this lab to T1555.004 as a relevant investigation technique. Record the activity as benign test behavior, and do not claim that a malicious credential-access technique was successfully completed.
+Retain the process event and relevant command-line details as evidence. Redact personal email addresses and credential target names from public screenshots.
 
-Reference: MITRE ATT&CK — Credentials from Password Stores: Windows Credential Manager.
+## Official Reference
+
+https://attack.mitre.org/techniques/T1555/004/
