@@ -1,43 +1,56 @@
-# MITRE ATT&CK Mapping — Detection Rule 11
+# MITRE ATT&CK Mapping — Living-Off-The-Land Binaries
 
-## Overview
+## Detection Overview
 
-Living Off The Land Binaries (LOLBins) are legitimate system utilities that may be abused to perform actions such as transferring files, executing scripts, or loading components.
+This detection investigates the use of legitimate Windows utilities that can be abused for execution, proxy execution, file handling, or other adversary behaviors.
 
-The appropriate MITRE ATT&CK mapping depends on the actual behavior observed. A binary name alone does not establish a specific technique.
+Examples considered in this lab include `certutil.exe`, `bitsadmin.exe`, `mshta.exe`, `regsvr32.exe`, and `rundll32.exe`.
 
-## Candidate Techniques
+## ATT&CK Mapping
 
-| Technique                               | ID        | When it may apply                                                        |
-| --------------------------------------- | --------- | ------------------------------------------------------------------------ |
-| System Binary Proxy Execution: Rundll32 | T1218.011 | Rundll32 is used to proxy execution of a malicious payload or component. |
-| System Binary Proxy Execution: Regsvr32 | T1218.010 | Regsvr32 is abused to execute a malicious component or scriptlet.        |
-| System Binary Proxy Execution: Mshta    | T1218.005 | Mshta is used to execute malicious HTA or script content.                |
-| Ingress Tool Transfer                   | T1105     | Evidence shows a tool or file being transferred into the environment.    |
-| Deobfuscate/Decode Files or Information | T1140     | Evidence shows encoded content being decoded or deobfuscated.            |
+| Field                      | Details                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| Official ATT&CK Identifier | Behavior-specific; no single technique assigned to all LOLBins                                   |
+| Official Technique Name    | Depends on the binary's observed use                                                             |
+| Supporting Event           | Sysmon Event ID 1 — Process Create                                                               |
+| Supporting Fields          | `Image`, `CommandLine`, `ParentImage`, `User`, `UtcTime`                                         |
+| Candidate Technique        | T1218.005 — System Binary Proxy Execution: Mshta                                                 |
+| Candidate Technique        | T1218.010 — System Binary Proxy Execution: Regsvr32                                              |
+| Candidate Technique        | T1218.011 — System Binary Proxy Execution: Rundll32                                              |
+| Candidate Technique        | T1140 — Deobfuscate/Decode Files or Information, if decoding behavior is demonstrated            |
+| Candidate Technique        | T1197 — BITS Jobs, if BITS-job abuse is demonstrated                                             |
+| Mapping Confidence         | Conditional on command-line arguments and resulting behavior                                     |
+| Validation Status          | Broad hunting query validated; focused suspicious-behavior detection requires further validation |
 
-These are candidate mappings for future validated detections, not confirmed mappings for the current benign test.
+## Mapping Rationale
 
-## Observed Lab Activity
+Legitimate Windows binaries may be abused by adversaries to execute content or perform actions without introducing a conventional standalone executable.
 
-The confirmed event involved:
+Sysmon Event ID 1 provides process and command-line context that can support investigation. The exact technique depends on what the utility actually does.
 
-* `certutil.exe`
-* Command line: `certutil.exe -?`
-* Parent: PowerShell
-* Sysmon Event ID: 1
+## What the Evidence Does Not Demonstrate
 
-The command requested help output. It did not demonstrate proxy execution, file transfer, or decoding.
+* That executing a Windows utility is inherently malicious.
+* That proxy execution occurred merely because a LOLBin launched.
+* That a file was decoded, downloaded, or executed.
+* That BITS jobs were abused.
+* That defense evasion occurred.
+* That command-and-control or data exfiltration occurred.
 
-## Mapping Decision
+## Validation Notes
 
-**Confirmed technique for the observed event:** None assigned.
+The observed `certutil.exe -?` command demonstrates process-creation visibility for the utility. It does not demonstrate malicious decoding or another suspicious LOLBin technique.
 
-The event establishes process execution only. Technique mapping should be assigned when the observed behavior and supporting evidence justify it.
+Use command-line evidence and corroborating events to assign a specific technique. Do not map every LOLBin event to every candidate technique.
 
-## Detection Improvements
+## Official References
 
-* Retain process image and command-line telemetry.
-* Examine parent-child process relationships.
-* Correlate suspicious command lines with network and file activity.
-* Document the evidence supporting each technique assignment.
+https://attack.mitre.org/techniques/T1218/005/
+
+https://attack.mitre.org/techniques/T1218/010/
+
+https://attack.mitre.org/techniques/T1218/011/
+
+https://attack.mitre.org/techniques/T1140/
+
+https://attack.mitre.org/techniques/T1197/
