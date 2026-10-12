@@ -1,127 +1,97 @@
-# SOC Incident Report - RDP Logon
+# SOC Incident Report — IR-008: Remote Desktop Logon Monitoring
 
-## Incident ID
+## 1. Executive Summary
 
-```text
-SOC-IR-008
-```
+**Incident ID:** SOC-IR-008
+**Category:** Remote Access / Authentication
+**Environment:** Windows 11 lab endpoint
+**Detection Platform:** Splunk Enterprise
+**Telemetry Source:** Windows Security Event Log
+**Status:** Logon-monitoring exercise
+**Severity:** Informational — Authorization assessment required
+**Disposition:** RDP-related authentication investigation
 
-## Incident Title
+This exercise evaluates detection of successful remote interactive logons on Windows.
 
-Successful Remote Desktop Protocol (RDP) Logon
+Windows Security Event ID 4624 with Logon Type 10 can support identification of Remote Interactive logon activity.
 
-## Detection Source
+A successful RDP-related logon does not automatically indicate unauthorized access.
 
-Splunk SIEM
+## 2. Scope and Environment
 
-## Log Source
+| Attribute     | Details              |
+| ------------- | -------------------- |
+| Endpoint      | `TargetMachine`      |
+| SIEM index    | `main`               |
+| Event ID      | 4624                 |
+| Key indicator | Logon Type 10        |
+| Data source   | Windows Security log |
 
-Windows Security Event Log
+## 3. Detection and Evidence
 
-## Event ID
+Record the following from the actual event:
 
-```text
-4624
-```
+* Timestamp
+* Target account
+* Logon type
+* Source IP address
+* Workstation name, if available
+* Authentication context
+* Relevant event record identifier
 
-## Logon Type
+**Observed timestamp:** [Insert verified timestamp]
+**Account:** [Insert verified account]
+**Logon Type:** 10, if confirmed
+**Source address:** [Insert verified address]
 
-```text
-10 - RemoteInteractive
-```
+## 4. Investigation and Analysis
 
-## MITRE ATT&CK
+Confirm that the event is a successful Remote Interactive logon.
 
-```text
-T1021.001 - Remote Services: Remote Desktop Protocol
-```
+Review the account, source address, destination endpoint, and whether the session was authorized. Correlate with subsequent process activity if the investigation requires determining what occurred during the session.
 
-## Incident Description
+## 5. MITRE ATT&CK Mapping
 
-A successful Remote Desktop Protocol authentication was detected on the Windows target system.
+**Candidate technique:** T1021.001 — Remote Services: Remote Desktop Protocol.
 
-The authentication generated Windows Security Event ID 4624 with Logon Type 10, indicating a successful RemoteInteractive logon.
+**Official reference:** https://attack.mitre.org/techniques/T1021/001/
 
-Microsoft documents Event ID 4624 as a successful logon event and identifies Logon Type 10 as RemoteInteractive, used for Remote Desktop/Terminal Services connections.
+The mapping is appropriate when RDP use is established. A technique mapping alone does not establish adversary activity.
 
-## Detection Details
+## 6. Impact Assessment
 
-| Field              | Value                |
-| ------------------ | -------------------- |
-| Event ID           | 4624                 |
-| Logon Type         | 10                   |
-| Host               | TargetMachine        |
-| Account            | a4803                |
-| Source             | Windows Security Log |
-| Detection Platform | Splunk               |
-| MITRE Technique    | T1021.001            |
+* Unauthorized remote access: Not established.
+* Account compromise: Not established.
+* Lateral movement: Not established.
+* Post-logon malicious activity: Not established.
 
-## Investigation
+## 7. Response and Containment
 
-The SOC analyst should investigate the following:
+Do not disable accounts or block remote access solely because a successful logon occurred.
 
-### 1. User Account
+If the session is determined to be unauthorized, preserve authentication evidence and follow the organization's access-control and incident-response procedures.
 
-Determine whether the account associated with the RDP session is authorized to access the target system remotely.
+## 8. False-Positive Considerations
 
-### 2. Source Address
+Legitimate remote administration, help-desk activity, and authorized user sessions can generate these events.
 
-Review the `IpAddress` field to identify the source system that initiated the RDP connection.
+## 9. Limitations and Evidence Gaps
 
-### 3. Authentication Details
+A successful logon confirms authentication activity but does not independently reveal the purpose of the session or prove compromise.
 
-Review:
+## 10. Recommendations
 
-* Logon Process
-* Authentication Package
-* Logon ID
-* Workstation Name
-* Source Port
+* Verify logon type and source information.
+* Establish expected remote-access patterns.
+* Correlate authentication with endpoint activity.
+* Review account and remote-access policies when suspicious activity is identified.
 
-### 4. Related Events
+## 11. Final Disposition
 
-Search for events occurring immediately before and after the RDP authentication.
+**Disposition:** Remote-access monitoring exercise; unauthorized access not established.
 
-Relevant events may include:
+**Validation status:** RDP-related logon telemetry observed; document focused detection validation separately.
 
-```text
-4625 - Failed logon
-4672 - Special privileges assigned to new logon
-4688 - Process creation
-4634 - Logoff
-```
+**Analyst Notes:** Windows Security Event ID 4624 with Logon Type 10 can provide evidence of a successful Remote Interactive logon. The account, source address, and surrounding activity should be reviewed to determine whether the session was authorized. A successful logon alone does not establish unauthorized access or lateral movement.
 
-### 5. Post-Logon Activity
 
-Review process creation, PowerShell activity, network connections, persistence mechanisms, and other suspicious activity following the RDP session.
-
-## Impact
-
-A successful RDP logon provides remote interactive access to the Windows system.
-
-The security impact depends on:
-
-* Account privileges
-* Source system
-* Authorization
-* Subsequent activity
-* Whether the account was compromised
-
-## Response
-
-If the RDP session is unauthorized:
-
-1. Validate the source IP.
-2. Identify the account owner.
-3. Terminate the active session if required.
-4. Disable or reset the affected account if compromise is suspected.
-5. Review authentication and process activity.
-6. Investigate potential lateral movement.
-7. Check for persistence mechanisms.
-8. Document the incident.
-
-## Lab Conclusion
-
-The RDP simulation successfully generated Windows Security Event ID 4624 with Logon Type 10. The event was collected by Splunk Universal Forwarder and detected using a Splunk SPL query.
-
-This demonstrates a SOC workflow for identifying and investigating successful remote access to Windows systems.
