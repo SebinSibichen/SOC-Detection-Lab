@@ -97,4 +97,6 @@ A process-creation event does not alone prove that a service was successfully re
 
 **Validation status:** Process telemetry observed; record the actual focused detection results separately.
 
-**Analyst notes:** [Record verified findings]
+**Analyst Notes:** A controlled service-creation exercise involving SOC_Lab_Service was used to generate process-creation telemetry. The associated sc.exe command provides evidence of the attempted service-creation operation. Service registration and cleanup should be verified separately. The controlled test does not establish malicious persistence or privilege escalation.
+
+
