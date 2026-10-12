@@ -1,48 +1,45 @@
-# MITRE ATT&CK Mapping - PowerShell Encoded Command
+# MITRE ATT&CK Mapping — Encoded PowerShell
 
-## Technique
+## Detection Overview
 
-**T1059.001 – PowerShell**
+This detection searches PowerShell process command lines for encoded-command arguments that may warrant further investigation.
 
-## Tactic
+## ATT&CK Mapping
 
-**Execution**
+| Field                      | Details                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| Official ATT&CK Identifier | T1059.001                                                                                       |
+| Official Technique Name    | Command and Scripting Interpreter: PowerShell                                                   |
+| Secondary Identifier       | T1027 — Conditional                                                                             |
+| Secondary Technique Name   | Obfuscated Files or Information                                                                 |
+| Tactic                     | Execution; Defense Evasion for T1027                                                            |
+| Supporting Event           | Sysmon Event ID 1 — Process Create                                                              |
+| Supporting Fields          | `Image`, `CommandLine`, `ParentImage`, `User`, `UtcTime`                                        |
+| Mapping Confidence         | T1059.001 when PowerShell execution is observed; T1027 requires supporting obfuscation evidence |
+| Validation Status          | Verify encoded-command matching and benign test results                                         |
 
-## Description
+## Mapping Rationale
 
-The detection monitors PowerShell process creation where the command line contains encoded-command parameters such as:
+PowerShell can execute commands supplied through encoded command-line arguments. Such arguments can make the command less immediately readable during initial inspection.
 
-```text
--EncodedCommand
-```
+T1059.001 is appropriate when PowerShell execution is observed. T1027 may be relevant when the evidence supports an obfuscation technique.
 
-```text
--Encoded
-```
+## What the Evidence Does Not Demonstrate
 
-```text
--enc
-```
+* That the encoded content is malicious.
+* That the encoded command was decoded successfully.
+* That a payload executed successfully.
+* That encoding was used specifically to evade detection.
+* That the endpoint was compromised.
 
-PowerShell is a legitimate Windows administration and scripting tool, but attackers can abuse it to execute commands while attempting to obscure their contents.
+## Validation Notes
 
-## Detection Evidence
+Inspect the complete command line and, where appropriate, decode the test input in a controlled environment. Compare the detection against ordinary PowerShell activity to identify false positives.
 
-The detection is based on:
+Do not assign T1027 solely because an encoded-command argument is present.
 
-* Sysmon Event ID 1
-* `powershell.exe`
-* PowerShell command-line arguments
-* `CommandLine` containing encoded-command parameters
+## Official References
 
-## Project Mapping
+https://attack.mitre.org/techniques/T1059/001/
 
-| Project Component | Mapping                               |
-| ----------------- | ------------------------------------- |
-| Sysmon Event ID   | 1 – Process Creation                  |
-| Detection         | Suspicious PowerShell Encoded Command |
-| MITRE Tactic      | Execution                             |
-| MITRE Technique   | T1059.001                             |
-| Data Source       | Windows Sysmon                        |
-| SIEM              | Splunk                                |
-| Severity          | Medium                                |
+https://attack.mitre.org/techniques/T1027/
