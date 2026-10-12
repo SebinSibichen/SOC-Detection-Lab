@@ -1,46 +1,41 @@
-# MITRE ATT&CK Mapping 10 — Suspicious Parent-Child Process
+# MITRE ATT&CK Mapping — Suspicious Parent-Child Processes
 
-## Primary Detection Objective
+## Detection Overview
 
-Identify potentially suspicious process execution relationships using Sysmon process-creation telemetry.
+This detection investigates unusual relationships between parent and child processes. Its purpose is to identify process execution patterns that may warrant further analysis.
 
-## Potential Technique: T1059 — Command and Scripting Interpreter
+## ATT&CK Mapping
 
-* Tactic: Execution
-* Relevance: A scripting or command interpreter may be used to execute commands.
-* Evidence to examine: Child executable, command line, user, parent process, and related events.
+| Field                      | Details                                                                                  |
+| -------------------------- | ---------------------------------------------------------------------------------------- |
+| Official ATT&CK Identifier | No single technique assigned without behavior-specific evidence                          |
+| Official Technique Name    | Depends on the observed behavior                                                         |
+| Tactic                     | Depends on the observed behavior                                                         |
+| Supporting Event           | Sysmon Event ID 1 — Process Create                                                       |
+| Supporting Fields          | `ParentImage`, `Image`, `CommandLine`, `User`, `UtcTime`, `ProcessId`, `ParentProcessId` |
+| Mapping Confidence         | Requires investigation of the specific process relationship                              |
+| Validation Status          | Needs further validation if the focused query has not returned representative events     |
 
-## Conditional Sub-techniques
+## Mapping Rationale
 
-Use a specific sub-technique only when the observed activity supports it.
+Unexpected parent-child relationships can help identify suspicious execution chains. For example, an Office application spawning a command interpreter may warrant investigation.
 
-Examples:
+However, the process relationship alone is not enough to assign a specific ATT&CK technique. The mapping should reflect the behavior demonstrated by the child process and its command line.
 
-* T1059.001 — PowerShell, when PowerShell execution is observed.
-* T1059.003 — Windows Command Shell, when `cmd.exe` activity is observed.
+## What the Evidence Does Not Demonstrate
 
-## Important Distinction
+* That the parent process was compromised.
+* That the child process was malicious.
+* That exploitation occurred.
+* That a specific ATT&CK technique was successfully executed.
+* That an unusual process relationship is necessarily malicious.
 
-A parent-child relationship alone does not prove that a technique was used maliciously. The analyst must assess the command line, context, and supporting telemetry.
+## Validation Notes
 
-## Detection Data
+Use controlled tests to confirm that the intended process relationship is logged and searchable. Test both matching and benign process relationships.
 
-* Sysmon Event ID 1
-* `ParentImage`
-* `Image`
-* `CommandLine`
-* `User`
-* `ComputerName`
+If the focused SPL query returns zero events, investigate the time range, field names, process availability, and query conditions before claiming detection success.
 
-## Lab Validation
+## Mapping Policy
 
-The Splunk lab confirms that process-creation events and the parent/child fields are available. The Office-to-script query returned zero events during the initial test; therefore, a matching detection has not yet been confirmed.
-
-## References
-
-MITRE ATT&CK:
-
-* T1059 — Command and Scripting Interpreter
-* T1059.001 — PowerShell
-* T1059.003 — Windows Command Shell
-
+Assign a specific ATT&CK technique only after the observed process behavior supports it. Record the technique, evidence, and limitations in this file when the mapping is established.
