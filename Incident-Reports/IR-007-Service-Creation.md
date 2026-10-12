@@ -1,175 +1,100 @@
-# SOC Incident Report — Service Creation
-
-## Incident ID
-
-`SOC-IR-007`
-
-## Detection ID
-
-`SOC-DET-007`
-
-## Incident Type
-
-Windows Service Creation
-
-## Severity
-
-Medium
-
-## Status
-
-Closed — Lab Simulation
-
----
+# SOC Incident Report — IR-007: Windows Service Creation
 
 ## 1. Executive Summary
 
-A Windows service creation event was detected on the monitored Windows 11 host.
+**Incident ID:** SOC-IR-007
+**Category:** Service Creation / Potential Persistence
+**Environment:** Windows 11 lab endpoint
+**Detection Platform:** Splunk Enterprise
+**Telemetry Source:** Sysmon Operational Log
+**Status:** Controlled lab exercise
+**Severity:** Informational — Benign test activity
+**Disposition:** Service-creation monitoring and validation
 
-The activity was generated as part of a controlled SOC detection lab using `sc.exe`. The service was named `SOC_Lab_Service` and was configured to execute `notepad.exe`.
+This exercise evaluates the visibility of Windows service-creation activity.
 
-Sysmon recorded the activity as a Process Creation event and forwarded the telemetry to Splunk for detection and investigation.
+A controlled lab service named `SOC_Lab_Service` was used to generate process-creation telemetry associated with a service-creation command.
 
-The activity was confirmed to be a benign lab simulation.
+The creation of a service is not inherently malicious. The purpose of the exercise is to verify telemetry collection and evaluate the supporting detection logic.
 
----
+## 2. Scope and Environment
 
-## 2. Affected Host
+| Attribute     | Details           |
+| ------------- | ----------------- |
+| Endpoint      | `TargetMachine`   |
+| SIEM          | Splunk Enterprise |
+| Index         | `main`            |
+| Primary event | Sysmon Event ID 1 |
+| Test service  | `SOC_Lab_Service` |
 
-**Hostname:**
+## 3. Detection and Evidence
 
-```text
-TargetMachine
-```
+**Observed activity:** Controlled service-creation command.
 
-**User:**
+Relevant evidence includes:
 
-```text
-TARGETMACHINE\a4803
-```
+* `sc.exe` process execution
+* `CommandLine`
+* `ParentImage`
+* `User`
+* `UtcTime`
+* Service name and binary path
+* Resulting service configuration, if collected
 
----
+**Observed timestamp:** [Insert verified timestamp]
+**Event record number:** [Insert verified record number]
+**Service name:** `SOC_Lab_Service`
 
-## 3. Observed Process
+The report should reference the actual Splunk event and corresponding screenshot.
 
-**Process:**
+## 4. Investigation and Analysis
 
-```text
-C:\Windows\System32\sc.exe
-```
+Review the service-creation command and determine whether the service was successfully registered.
 
-**Parent Process:**
+Inspect the configured service name, binary path, start type, and execution account where available.
 
-```text
-C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-```
+For this exercise, the service name identifies a controlled lab test. Do not classify the test as adversary persistence.
 
----
+## 5. MITRE ATT&CK Mapping
 
-## 4. Observed Command Line
+**Technique:** T1543.003 — Create or Modify System Process: Windows Service.
 
-```text
-"C:\Windows\system32\sc.exe" create SOC_Lab_Service binPath= C:\Windows\System32\notepad.exe start= auto
-```
+**Official reference:** https://attack.mitre.org/techniques/T1543/003/
 
----
+The technique is relevant to the service-creation behavior. The observed benign test does not demonstrate malicious use of that technique.
 
-## 5. Detection Source
+## 6. Impact Assessment
 
-**Data Source:**
+* Malicious service creation: Not established.
+* Privilege escalation: Not established.
+* Unauthorized persistence: Not established.
+* Endpoint compromise: Not established.
 
-Sysmon
+## 7. Response and Cleanup
 
-**Event ID:**
+Remove the controlled test service after collecting the required evidence.
 
-```text
-1 — Process Create
-```
+Verify its removal and document the cleanup result. Avoid deleting unrelated services.
 
-**Splunk Source:**
+## 8. False-Positive Considerations
 
-```text
-WinEventLog:Microsoft-Windows-Sysmon/Operational
-```
+Software installation, system administration, and legitimate application deployment commonly create or modify Windows services.
 
----
+## 9. Limitations and Evidence Gaps
 
-## 6. MITRE ATT&CK Mapping
+A process-creation event does not alone prove that a service was successfully registered, started, or used for persistence.
 
-**Technique:**
+## 10. Recommendations
 
-`T1543.003 — Create or Modify System Process: Windows Service`
+* Correlate process creation with service-installation events or service configuration.
+* Include service name and binary path in investigations.
+* Document both test execution and cleanup.
+* Test detection logic against legitimate service creation.
 
-The technique describes the creation or modification of Windows services that can be used for execution or persistence.
+## 11. Final Disposition
 
----
+**Disposition:** Controlled service-creation test; no malicious incident established.
 
-## 7. Investigation
+**Validation status:** Process telemetry observed; record the actual focused detection results separately.
 
-The SOC detection identified `sc.exe` executing a `create` operation.
-
-The following evidence was reviewed:
-
-* Executable path
-* Command line
-* User account
-* Parent process
-* Hostname
-* Sysmon Event ID
-* Splunk event telemetry
-
-The parent process was identified as PowerShell.
-
-The created service used:
-
-```text
-C:\Windows\System32\notepad.exe
-```
-
----
-
-## 8. Analyst Assessment
-
-The event was determined to be a **controlled and authorized laboratory simulation**.
-
-No malicious payload was used.
-
-The service was created specifically to generate telemetry and validate the Splunk detection rule.
-
----
-
-## 9. Response
-
-The following actions were performed:
-
-1. Confirmed the service creation event.
-2. Verified Sysmon telemetry.
-3. Confirmed ingestion into Splunk.
-4. Investigated the process and parent process.
-5. Mapped the activity to MITRE ATT&CK.
-6. Documented the detection.
-7. Removed the test service after testing.
-
----
-
-## 10. Cleanup
-
-The test service can be removed using:
-
-```powershell
-sc.exe delete SOC_Lab_Service
-```
-
----
-
-## 11. Conclusion
-
-The SOC lab successfully detected Windows service creation activity using Sysmon Process Creation telemetry and a Splunk SPL detection query.
-
-The investigation demonstrated how a SOC analyst can correlate:
-
-```text
-User → Process → Parent Process → Command Line → Service Creation
-```
-
-to investigate potentially suspicious service activity.
+**Analyst notes:** [Record verified findings]
