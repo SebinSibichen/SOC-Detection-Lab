@@ -1,53 +1,98 @@
-# SOC Incident Report 010 — Suspicious Parent-Child Process
+# SOC Incident Report — IR-010: Suspicious Parent-Child Process Relationships
 
-## Incident Overview
+## 1. Executive Summary
 
-* Incident ID: SOC-IR-010
-* Detection: Suspicious Parent-Child Process
-* Host: `TargetMachine`
-* Data Source: Sysmon Event ID 1
-* SIEM: Splunk Enterprise
-* Severity: Medium if a suspicious relationship is confirmed; otherwise informational during testing
-* Status: Lab validation in progress
+**Incident ID:** SOC-IR-010
+**Category:** Endpoint Behavior Analysis
+**Environment:** Windows 11 lab endpoint
+**Detection Platform:** Splunk Enterprise
+**Telemetry Source:** Sysmon Operational Log
+**Status:** Detection-validation exercise
+**Severity:** Informational — Focused detection requires validation
+**Disposition:** Process-relationship investigation
 
-## Alert Description
+This exercise investigates parent-child process relationships that may be unusual or inconsistent with expected application behavior.
 
-The detection searches for selected Office applications spawning command interpreters or scripting engines. Such behavior may occur during malicious document execution, but it can also result from authorized automation.
+The objective is to establish visibility into process execution chains and identify relationships that merit further investigation.
 
-## Evidence
+An unusual process relationship is not independently evidence of malicious activity.
 
-The lab's Splunk screenshot confirms that Sysmon process-creation events are ingested and that `ParentImage` and `Image` fields are available.
+## 2. Scope and Environment
 
-The initial Office-to-script detection returned zero events. Therefore, no matching Office-to-script activity has been confirmed by that query.
+| Attribute     | Details                                       |
+| ------------- | --------------------------------------------- |
+| Endpoint      | `TargetMachine`                               |
+| SIEM index    | `main`                                        |
+| Primary event | Sysmon Event ID 1                             |
+| Key fields    | `ParentImage`, `Image`, `CommandLine`, `User` |
 
-A controlled PowerShell-to-CMD test may be used to validate the process-relationship search independently.
+## 3. Detection and Evidence
 
-## Investigation
+Relevant fields:
 
-1. Review the parent executable.
-2. Review the child executable and command line.
-3. Confirm the associated user and endpoint.
-4. Establish whether the relationship is expected.
-5. Correlate with authentication, PowerShell, and network telemetry.
-6. Document the result and escalate if further evidence supports malicious activity.
+* `ParentImage`
+* `Image`
+* `CommandLine`
+* `User`
+* `UtcTime`
+* `ProcessId`
+* `ParentProcessId`
 
-## MITRE ATT&CK
+**Observed timestamp:** [Insert verified timestamp]
+**Parent process:** [Insert verified value]
+**Child process:** [Insert verified value]
+**Command line:** [Insert verified value]
 
-Potentially relevant technique: T1059 — Command and Scripting Interpreter.
+If no matching event was found, document the search result and investigation steps instead of inventing event details.
 
-The specific sub-technique depends on the observed behavior. Do not assign a technique solely because a process relationship appears suspicious.
+## 4. Investigation and Analysis
 
-## Analyst Assessment
+Inspect the parent process, child process, command line, user context, and execution time.
 
-The presence of process-creation telemetry demonstrates that the endpoint can provide useful process relationship evidence. The original Office-to-script detection has not yet produced a matching event, so this report does not claim a confirmed malicious incident.
+Determine whether the relationship is expected for the software or activity being tested. Correlate with file, network, script, or authentication events when relevant.
 
-## Recommended Actions
+The focused query should be considered unvalidated if it has not returned representative matching events.
 
-* Validate the detection with an appropriate controlled test.
-* Tune the rule against known legitimate automation.
-* Preserve the relevant process event and command line.
-* Escalate only when the evidence justifies further investigation.
+## 5. MITRE ATT&CK Mapping
 
-## Final Status
+**Technique:** No single ATT&CK technique assigned from the process relationship alone.
 
-Pending detection validation. Update this report when an actual matching event has been captured.
+A technique-specific mapping requires evidence of the behavior performed by the process.
+
+## 6. Impact Assessment
+
+* Malicious execution: Not established.
+* Exploitation: Not established.
+* Unauthorized access: Not established.
+* Endpoint compromise: Not established.
+
+## 7. Response and Containment
+
+No containment is warranted solely because a parent-child relationship is unusual.
+
+If additional evidence supports malicious activity, preserve the relevant process events and investigate the execution chain.
+
+## 8. False-Positive Considerations
+
+Installers, administrative tools, software updaters, scripts, and legitimate applications can create process relationships that appear unusual.
+
+## 9. Limitations and Evidence Gaps
+
+A query returning zero events does not prove that the behavior is absent. Possible causes include an unsuitable test, incorrect field names, restrictive filters, missing telemetry, or an incorrect time range.
+
+## 10. Recommendations
+
+* Validate the search against a controlled test.
+* Review actual field names and event data.
+* Test representative benign process relationships.
+* Document expected matches and non-matches.
+
+## 11. Final Disposition
+
+**Disposition:** Detection-development exercise; malicious activity not established.
+
+**Validation status:** Needs further validation if the focused detection has not returned a representative event.
+
+**Analyst Notes:** The detection is intended to identify potentially unusual parent-child process relationships using Sysmon Event ID 1. The parent image, child image, command line, and execution context should be examined. The focused query requires representative test results before detection effectiveness can be confirmed.
+
+
